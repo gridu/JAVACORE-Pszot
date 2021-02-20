@@ -1,29 +1,53 @@
 package com.griddynamics.task_2;
 
+
+import lombok.SneakyThrows;
 import org.testng.annotations.Test;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static org.testng.Assert.assertEquals;
+
 
 public class ThreadPoolTest {
     
-    private static final Logger LOGGER = Logger.getLogger(ThreadPoolTest.class.getName());
+    private final int THREAD_POOL_SIZE = 3;
+    private final int TIMEOUT = 1;
+    
     
     @Test
-    public void shouldExecuteInParallel() throws InterruptedException {
-        ThreadPool pool = new ThreadPool(5);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.1 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.2 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.3 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.4 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.5 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.6 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.7 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.8 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.9 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.10 is running"), 1);
-        pool.execute(() -> LOGGER.log(Level.INFO, "Task no.11 is running"), 1);
-        pool.close();
+    public void shouldRunTasksOnMultipleThreads() throws InterruptedException {
+        
+        int startingThreadCount = Thread.activeCount();
+        
+        ThreadPool threadPool = new ThreadPool(THREAD_POOL_SIZE);
+        
+        assertEquals(Thread.activeCount(), THREAD_POOL_SIZE + startingThreadCount);
+        
+        for (int i = 0 ; i < 10 ; i++) {
+            threadPool.execute(new Task(TIMEOUT));
+        }
+        
+        threadPool.shutdown();
+        
+        assertEquals(Thread.activeCount(), startingThreadCount);
+    }
+    
+    
+    private static class Task implements Runnable {
+        
+        private final long timeout;
+        
+        public Task(long timeout) {
+            
+            this.timeout = timeout;
+        }
+        
+        @SneakyThrows
+        @Override
+        public void run() {
+            
+            Thread.sleep(timeout);
+        }
+        
     }
     
 }

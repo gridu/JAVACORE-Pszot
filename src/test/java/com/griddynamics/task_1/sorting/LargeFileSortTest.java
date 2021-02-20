@@ -5,7 +5,6 @@ import com.griddynamics.task_1.config.Configuration;
 import com.griddynamics.task_1.random.RandomFileGenerator;
 import com.griddynamics.task_1.random.RandomStringGenerator;
 import com.griddynamics.task_1.sorting.validation.SortedFileValidator;
-import io.qameta.allure.Step;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -37,6 +36,7 @@ public class LargeFileSortTest {
     
     @BeforeTest
     public static void setUp() {
+    
         comparator = new BasicStringComparator();
         fileGenerator = new RandomFileGenerator(config.getMaxFileSizeUntilSplit().add(128));
         fileLineGenerator = new RandomStringGenerator(30, 60);
@@ -44,23 +44,25 @@ public class LargeFileSortTest {
     
     @BeforeMethod
     public void prepareTest() {
+    
         createTempFile();
         createValidator();
     }
     
-    @Step("Create temporary file")
     private void createTempFile() {
+    
         largeFile = fileGenerator.createRandomFile(fileLineGenerator);
         LOGGER.log(Level.INFO, "Temporary file successfully created: " + largeFile.getFileName());
     }
     
-    @Step("Create sort validator")
     private void createValidator() {
+    
         fileValidator = new SortedFileValidator(largeFile, comparator);
     }
     
     @AfterMethod
     public void deleteTempFile() {
+    
         File file = largeFile.toFile();
         if (file.delete()) {
             LOGGER.log(Level.INFO, "Temporary file successfully deleted: " + file.getName());
@@ -69,6 +71,7 @@ public class LargeFileSortTest {
     
     @Test
     public void shouldSortLargeFile() {
+    
         new LargeFileSorter(comparator, config.getMaxTempFileSize()).sort(largeFile);
         assertSortedFile(largeFile, fileValidator);
     }
